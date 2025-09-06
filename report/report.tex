@@ -20,6 +20,7 @@
 \usepackage{lipsum}
 \usepackage{booktabs}
 \usepackage{multirow}
+\usepackage{xurl}
 
 \newcommand{\note}[1]{\textcolor{blue}{{#1}}}
 
@@ -66,7 +67,7 @@ This work serves as a foundation for understanding the project and guiding futur
   The QA-pairs with low-scoring questions are removed.
 
   Then, RAG-Anything is queried with the questions and has the responses collected.
-  The responses and the QA-pair are formatted into an evaluation prompt, utilizing another model to score the RAG response from 1 to 5.
+  The responses and the QA-pair are formatted into an evaluation prompt, utilizing another model to score the RAG response from 1 to 5.\footnote{Evaluation script: \url{https://github.com/rnluo/RAG-Anything/blob/main/examples/evaluation_on_single_file.py}}
 
   The prompts in this section are adapted from Hugging Face\footnote{\url{https://huggingface.co/learn/cookbook/en/rag_evaluation}}.
 
@@ -109,6 +110,7 @@ This work serves as a foundation for understanding the project and guiding futur
   For multimodal questions, I crop relavant screenshots with provided bounding box coordinates and save them as temporary files.
   The temporary files are added into the knowledge base of RAG-Anything, which is queried by corresponding questions.
   The RAG-responses are scored from 1 to 5 with the same evaluation prompt in section 1.
+  \footnote{Evaluation script: \url{https://github.com/rnluo/RAG-Anything/blob/main/examples/evaluation_on_dataset.py}}
 
   Since the QA items are based on independent contexts, RAG-Anything must re-initialize and rebuild the knowledge base for every question, which is computationally expensive and time-consuming.
   This reveals the need for a specially curated dataset in the form of a single, long, multimodal-item-rich document with QA-pairs.
