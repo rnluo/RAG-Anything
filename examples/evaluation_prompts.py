@@ -103,6 +103,9 @@ An instruction (might include an Input inside it), a response to evaluate, a ref
 3. The output format should look as follows: \"Feedback: {{write a feedback for criteria}} [RESULT] {{an integer number between 1 and 5}}\"
 4. Please do not generate any other opening, closing, and explanations. Be sure to include [RESULT] in your output.
 
+Note that the reference answer is often very consise and only contain the key information, e.g. a number, or a name.
+The primary focus of evaluation is to examine whether the much-longer RAG response contain the correct key information.
+
 ###The instruction to evaluate:
 {instruction}
 
