@@ -252,7 +252,7 @@ async def process_with_rag(
 
     # Collect RAG-Anything responses to the questions
     for i, question_data in enumerate(questions_data):
-        logger.info(f"Collecting response to question {i}/200")
+        logger.info(f"Collecting response to question {i+1}/{len(questions_data)}")
 
         # Remove the knowledge base
         if os.path.exists(config.working_dir):
@@ -335,10 +335,6 @@ async def process_with_rag(
             except OSError as e:
                 logger.error(f"Error removing temp file {path}: {e}")
 
-
-
-
-
     # LLM evaluation
     evaluation_scores = {}
     for question_data in questions_data:
@@ -374,7 +370,6 @@ async def process_with_rag(
 
         avg_score = sum(int_scores) / len(int_scores) if int_scores else -1
         logger.info(f"Type: {type}\nItem count: {len(int_scores)}\nAverage score: {avg_score}")
-
 
 def main():
     """Main function to run the example"""

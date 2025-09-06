@@ -261,7 +261,6 @@ async def process_with_rag(
                 except (json.JSONDecodeError, KeyError, TypeError) as e:
                     logger.error(f"Failed to parse {type} QA response: {response}")
 
-
             elif type == "image":
                 img_path = item.get("img_path")
                 if img_path and os.path.exists(img_path):
@@ -282,7 +281,6 @@ async def process_with_rag(
                         })
                     except (json.JSONDecodeError, KeyError, TypeError) as e:
                         logger.error(f"Failed to parse {type} QA response: {response}")
-
 
             elif type == "equation":
                 context = item.get("text")
@@ -324,49 +322,43 @@ async def process_with_rag(
             if not question:
                 continue
             
-            if False:
-                # Filter out low-quality questions
-                critique_prompt_templates = {
-                    "groundness": PROMPTS["question_groundness_critique_prompt"],
-                    "relevance": PROMPTS["question_relevance_critique_prompt"],
-                    "standalone": PROMPTS["question_standalone_critique_prompt"]
-                }
-                low_quality = False
-                for critique_type, critique_prompt_template in critique_prompt_templates.items():
-                    if low_quality:
-                        break
-                    if critique_type == "groundness":
-                        critique_prompt = critique_prompt_template.format(
-                            context=context, 
-                            question=question
-                        )
-                    else:
-                        critique_prompt = critique_prompt_template.format(
-                            question=question
-                        )
-                    response = await llm_model_func(critique_prompt)
-                    fixed_response = response.replace('\\', '\\\\')
-                    try:
-                        response_json = json.loads(fixed_response)
-                        score = int(response_json.get("rating", 0))
-                        if score < 2:
-                            eval_item["rag_response"] = "[SKIP]"
-                            low_quality = True
-                    except (json.JSONDecodeError, KeyError, TypeError) as e:
-                        logger.error(f"Failed to parse critique: {response}")
-                        low_quality = True
+            # Filter out low-quality questions
+            critique_prompt_templates = {
+                "groundness": PROMPTS["question_groundness_critique_prompt"],
+                "relevance": PROMPTS["question_relevance_critique_prompt"],
+                "standalone": PROMPTS["question_standalone_critique_prompt"]
+            }
+            low_quality = False
+            for critique_type, critique_prompt_template in critique_prompt_templates.items():
                 if low_quality:
-                    continue
+                    break
+                if critique_type == "groundness":
+                    critique_prompt = critique_prompt_template.format(
+                        context=context, 
+                        question=question
+                    )
+                else:
+                    critique_prompt = critique_prompt_template.format(
+                        question=question
+                    )
+                response = await llm_model_func(critique_prompt)
+                fixed_response = response.replace('\\', '\\\\')
+                try:
+                    response_json = json.loads(fixed_response)
+                    score = int(response_json.get("rating", 0))
+                    if score < 2: # Set question quality threshold here
+                        eval_item["rag_response"] = "[SKIP]"
+                        low_quality = True
+                except (json.JSONDecodeError, KeyError, TypeError) as e:
+                    logger.error(f"Failed to parse critique: {response}")
+                    low_quality = True
+            if low_quality:
+                continue
 
             logger.info(f"\n[Text Query]: {question}")
             result = await rag.aquery(question, mode="hybrid")
             eval_item["rag_response"] = result
             logger.info(f"Answer: {result}")
-
-    for type_data in evaluation_data.values():
-        print("=========================================")
-        print(type_data[:2])
-        print("-----------------------------------------")
 
     # LLM evaluation
     evaluation_scores = {
@@ -407,9 +399,6 @@ async def process_with_rag(
 
         avg_score = sum(int_scores) / len(int_scores) if int_scores else -1
         logger.info(f"Type: {type}\nItem count: {len(int_scores)}\nAverage score: {avg_score}")
-
-
-
 
 def main():
     """Main function to run the example"""
